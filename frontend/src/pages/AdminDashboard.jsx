@@ -14,6 +14,12 @@ const AdminDashboard = () => {
   const [selectedClient, setSelectedClient] = useState('');
   const [selectedAgent, setSelectedAgent] = useState('');
 
+  // Editing state
+  const [editingUser, setEditingUser] = useState(null);
+  const [editUsername, setEditUsername] = useState('');
+  const [editPassword, setEditPassword] = useState('');
+  const [editRole, setEditRole] = useState('');
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -66,6 +72,40 @@ const AdminDashboard = () => {
       link.parentNode.removeChild(link);
     } catch (err) {
       alert('Error al exportar, verifica los logs');
+    }
+  };
+
+  const handleEditClick = (user) => {
+    setEditingUser(user._id);
+    setEditUsername(user.username);
+    setEditRole(user.role);
+    setEditPassword('');
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(`/auth/users/${editingUser}`, {
+        username: editUsername,
+        password: editPassword || undefined,
+        role: editRole
+      });
+      alert('Usuario actualizado con éxito');
+      setEditingUser(null);
+      fetchUsers();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al actualizar usuario');
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) return;
+    try {
+      await axios.delete(`/auth/users/${userId}`);
+      alert('Usuario eliminado');
+      fetchUsers();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al eliminar usuario');
     }
   };
 
@@ -141,6 +181,80 @@ const AdminDashboard = () => {
                 </tr>
               ))}
               {clients.length === 0 && <tr><td colSpan="3" className="py-4 text-center text-slate-500">No hay clientes creados.</td></tr>}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Full User Management Table */}
+      <div className="glass-card p-6 overflow-x-auto">
+        <h2 className="text-xl font-semibold mb-4 text-slate-800">Gestión de Todos los Usuarios (Agentes, Clientes y Admins)</h2>
+        {loading ? <p>Cargando...</p> : (
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200">
+                <th className="py-3 px-4 text-slate-600">Nombre de Usuario</th>
+                <th className="py-3 px-4 text-slate-600">Rol</th>
+                <th className="py-3 px-4 text-slate-600 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map(user => (
+                <tr key={user._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition">
+                  <td className="py-3 px-4 font-medium text-slate-800">
+                    {editingUser === user._id ? (
+                      <input 
+                        type="text" 
+                        value={editUsername} 
+                        onChange={(e) => setEditUsername(e.target.value)} 
+                        className="p-1 border rounded w-full"
+                      />
+                    ) : user.username}
+                  </td>
+                  <td className="py-3 px-4">
+                    {editingUser === user._id ? (
+                      <select 
+                        value={editRole} 
+                        onChange={(e) => setEditRole(e.target.value)} 
+                        className="p-1 border rounded w-full"
+                      >
+                        <option value="CLIENT">Cliente</option>
+                        <option value="AGENT">Agente</option>
+                        <option value="ADMIN">Administrador</option>
+                      </select>
+                    ) : (
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
+                        user.role === 'AGENT' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        {user.role}
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    {editingUser === user._id ? (
+                      <div className="space-y-2">
+                        <input 
+                          type="password" 
+                          placeholder="Nueva contraseña (dejar vacío si no el cambio)" 
+                          value={editPassword} 
+                          onChange={(e) => setEditPassword(e.target.value)} 
+                          className="p-1 border rounded w-full text-xs"
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button onClick={handleUpdateUser} className="text-green-600 font-bold text-sm">Guardar</button>
+                          <button onClick={() => setEditingUser(null)} className="text-slate-500 text-sm">Cancelar</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex justify-end gap-3">
+                        <button onClick={() => handleEditClick(user)} className="text-blue-600 hover:text-blue-800 text-sm font-semibold">Editar</button>
+                        <button onClick={() => handleDeleteUser(user._id)} className="text-red-600 hover:text-red-800 text-sm font-semibold">Eliminar</button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         )}
