@@ -9,6 +9,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/', requireAuth, requireRole(['AGENT', 'ADMIN']), upload.single('photo'), orderController.createOrder);
 router.get('/', requireAuth, orderController.getOrders); // Logic inside filters by role
+router.put('/bulk', requireAuth, requireRole(['CLIENT']), orderController.bulkUpdateOrders);
 router.put('/:id', requireAuth, orderController.updateOrder);
 router.get('/export/:clientId', requireAuth, requireRole(['ADMIN']), orderController.exportClientOrders);
 

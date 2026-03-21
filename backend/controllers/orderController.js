@@ -88,6 +88,27 @@ exports.updateOrder = async (req, res) => {
   }
 };
 
+exports.bulkUpdateOrders = async (req, res) => {
+  try {
+    const { updates } = req.body; // Array of { id, packagesToOrder }
+    
+    if (!Array.isArray(updates)) return res.status(400).json({ message: 'Updates must be an array' });
+
+    const bulkOps = updates.map(update => ({
+      updateOne: {
+        filter: { _id: update.id, clientId: req.user.id }, // Security: enforce ownership
+        update: { $set: { packagesToOrder: update.packagesToOrder } }
+      }
+    }));
+
+    await Order.bulkWrite(bulkOps);
+    res.json({ message: 'Orders updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error in bulk update' });
+  }
+};
+
 exports.exportClientOrders = async (req, res) => {
   try {
     const { clientId } = req.params;

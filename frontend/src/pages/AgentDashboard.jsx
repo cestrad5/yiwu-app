@@ -189,7 +189,6 @@ const AgentDashboard = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-y-4 gap-x-4 border-t border-slate-100 pt-4">
-            <h3 className="col-span-2 text-md font-semibold text-slate-800">Campos Opcionales</h3>
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">Tienda</label>
               <input type="text" value={shop} onChange={e => setShop(e.target.value)} className="input-field !px-2 !py-1 text-sm" placeholder="Nombre" />
