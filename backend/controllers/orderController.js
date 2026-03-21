@@ -124,7 +124,17 @@ exports.exportClientOrders = async (req, res) => {
     // Define columns
     worksheet.columns = [
       { header: 'Fecha', key: 'date', width: 20 },
-      { header: 'Agente', key: 'agent', width: 15 },
+      { header: 'Traductor', key: 'agent', width: 15 },
+      { header: 'Tienda', key: 'shop', width: 15 },
+      { header: 'Contacto', key: 'contact', width: 15 },
+      { header: 'Ref de Tienda', key: 'shopRef', width: 15 },
+      { header: 'Teléfono', key: 'phone', width: 15 },
+      { header: 'Medida (cm/ml)', key: 'measure', width: 15 },
+      { header: 'Peso', key: 'weight', width: 15 },
+      { header: 'Color', key: 'color', width: 15 },
+      { header: 'Item', key: 'item', width: 15 },
+      { header: 'Tipo de empaque', key: 'packagingType', width: 15 },
+      { header: 'Código de barras', key: 'barcode', width: 20 },
       { header: 'Categoría', key: 'category', width: 15 },
       { header: 'Foto', key: 'photo', width: 20 }, // Photo placeholder
       { header: 'Precio (RMB)', key: 'price', width: 15 },
@@ -138,6 +148,16 @@ exports.exportClientOrders = async (req, res) => {
         const rowValues = {
             date: new Date(order.timestamp || order.createdAt).toLocaleDateString(),
             agent: order.agentId ? order.agentId.username : 'N/A',
+            shop: order.shop || '',
+            contact: order.contact || '',
+            shopRef: order.shopRef || '',
+            phone: order.phone || '',
+            measure: order.measure || '',
+            weight: order.weight || '',
+            color: order.color || '',
+            item: order.item || '',
+            packagingType: order.packagingType || '',
+            barcode: order.barcode || '',
             category: order.category,
             price: order.priceRmb,
             units: order.unitsPerPackage,
@@ -154,14 +174,14 @@ exports.exportClientOrders = async (req, res) => {
                 buffer: response.data,
                 extension: 'webp', // Or determine from URL
             });
-            // Photo is in column 4 (D)
+            // Photo is now in column 14 (N) - index 13
             worksheet.addImage(imageId, {
-                tl: { col: 3, row: row.number - 1 }, // col is 0-indexed, row is 0-indexed where row 0 is header? Actually tl: {col, row}.
+                tl: { col: 13, row: row.number - 1 }, 
                 ext: { width: 100, height: 100 }
             });
         } catch (imgErr) {
             console.error('Error fetching image for Excel:', imgErr.message);
-            worksheet.getCell(`D${row.number}`).value = 'Image Error';
+            worksheet.getCell(`N${row.number}`).value = 'Image Error';
         }
     }
 

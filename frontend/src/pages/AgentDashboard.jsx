@@ -119,7 +119,7 @@ const AgentDashboard = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Captura de Productos</h1>
-          <p className="text-sm text-slate-500">Modo Agente</p>
+          <p className="text-sm text-slate-500">Modo Traductor</p>
         </div>
         <button className="text-sm text-red-500 font-semibold" onClick={() => { localStorage.clear(); window.location.href='/'; }}>Salir</button>
       </div>
@@ -236,7 +236,7 @@ const AgentDashboard = () => {
             disabled={loading} 
             className={`btn-primary shadow-xl mt-6 text-lg py-4 ${loading ? 'opacity-70' : ''}`}
           >
-            {loading ? 'Subiendo y Guardando...' : 'Registrar Producto'}
+            {loading ? 'Subiendo y Guardando...' : 'Registrar Producto (Traductor)'}
           </button>
         </form>
       </div>

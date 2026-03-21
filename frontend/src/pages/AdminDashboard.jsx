@@ -69,7 +69,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     try {
       await axios.post('/auth/assign-agent', { clientId: selectedClient, agentId: selectedAgent });
-      alert('Agente asignado con éxito');
+      alert('Traductor asignado con éxito');
       fetchUsers();
     } catch (err) {
       alert(err.response?.data?.message || 'Error al asignar agente');
@@ -145,7 +145,7 @@ const AdminDashboard = () => {
             <input type="password" placeholder="Contraseña" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="input-field" required />
             <select value={newRole} onChange={e => setNewRole(e.target.value)} className="input-field bg-white">
               <option value="CLIENT">Cliente</option>
-              <option value="AGENT">Agente</option>
+              <option value="AGENT">Traductor</option>
               <option value="ADMIN">Administrador</option>
             </select>
             <button type="submit" className="btn-primary">Crear Usuario</button>
@@ -154,17 +154,17 @@ const AdminDashboard = () => {
 
         {/* Assign Agent Card */}
         <div className="glass-card p-6">
-          <h2 className="text-xl font-semibold mb-4 text-slate-800">Asignar Agente a Cliente</h2>
+          <h2 className="text-xl font-semibold mb-4 text-slate-800">Asignar Traductor a Cliente</h2>
           <form onSubmit={handleAssignAgent} className="space-y-4">
             <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="input-field bg-white" required>
               <option value="">-- Seleccionar Cliente --</option>
               {clients.map(c => <option key={c._id} value={c._id}>{c.username}</option>)}
             </select>
             <select value={selectedAgent} onChange={e => setSelectedAgent(e.target.value)} className="input-field bg-white" required>
-              <option value="">-- Seleccionar Agente --</option>
+              <option value="">-- Seleccionar Traductor --</option>
               {agents.map(a => <option key={a._id} value={a._id}>{a.username}</option>)}
             </select>
-            <button type="submit" className="btn-primary bg-gradient-to-r from-blue-500 to-indigo-600 shadow-blue-500/30">Asignar Agente</button>
+            <button type="submit" className="btn-primary bg-gradient-to-r from-blue-500 to-indigo-600 shadow-blue-500/30">Asignar Traductor</button>
           </form>
         </div>
       </div>
@@ -186,13 +186,13 @@ const AdminDashboard = () => {
             />
           </div>
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Filtrar por Agente</label>
+            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Filtrar por Traductor</label>
             <select 
               value={filterAgent} 
               onChange={e => setFilterAgent(e.target.value)} 
               className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
             >
-              <option value="">Todos los agentes</option>
+              <option value="">Todos los traductores</option>
               {agents.map(a => <option key={a._id} value={a.username}>{a.username}</option>)}
             </select>
           </div>
@@ -212,8 +212,8 @@ const AdminDashboard = () => {
             <thead>
               <tr className="border-b border-slate-200">
                 <th className="py-3 px-4 text-slate-600">Cliente</th>
-                <th className="py-3 px-4 text-slate-600">Agente Asignado</th>
-                <th className="py-3 px-4 text-slate-600">Última Modif. (Agente)</th>
+                <th className="py-3 px-4 text-slate-600">Traductor Asignado</th>
+                <th className="py-3 px-4 text-slate-600">Última Modif. (Traductor)</th>
                 <th className="py-3 px-4 text-slate-600 text-right">Acción</th>
               </tr>
             </thead>
@@ -268,7 +268,7 @@ const AdminDashboard = () => {
 
       {/* Full User Management Table */}
       <div className="glass-card p-6 overflow-x-auto">
-        <h2 className="text-xl font-semibold mb-4 text-slate-800">Gestión de Todos los Usuarios (Agentes, Clientes y Admins)</h2>
+        <h2 className="text-xl font-semibold mb-4 text-slate-800">Gestión de Todos los Usuarios (Traductores, Clientes y Admins)</h2>
         {loading ? <p>Cargando...</p> : (
           <table className="w-full text-left border-collapse">
             <thead>
@@ -299,7 +299,7 @@ const AdminDashboard = () => {
                         className="p-1 border rounded w-full"
                       >
                         <option value="CLIENT">Cliente</option>
-                        <option value="AGENT">Agente</option>
+                        <option value="AGENT">Traductor</option>
                         <option value="ADMIN">Administrador</option>
                       </select>
                     ) : (
@@ -307,7 +307,7 @@ const AdminDashboard = () => {
                         user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
                         user.role === 'AGENT' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
                       }`}>
-                        {user.role}
+                        {user.role === 'AGENT' ? 'TRADUCTOR' : user.role}
                       </span>
                     )}
                   </td>
