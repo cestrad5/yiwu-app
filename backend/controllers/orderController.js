@@ -6,7 +6,10 @@ const axios = require('axios');
 
 exports.createOrder = async (req, res) => {
   try {
-    const { clientId, category, priceRmb, unitsPerPackage, cbmPerPackage } = req.body;
+    const { 
+      clientId, category, priceRmb, unitsPerPackage, cbmPerPackage,
+      shop, contact, shopRef, phone, measure, weight, color, item, packagingType, barcode
+    } = req.body;
     
     // Validations
     if (!req.file) return res.status(400).json({ message: 'Photo is required' });
@@ -25,7 +28,8 @@ exports.createOrder = async (req, res) => {
       unitsPerPackage,
       cbmPerPackage,
       photoUrl: result.secure_url,
-      packagesToOrder: 0
+      packagesToOrder: 0,
+      shop, contact, shopRef, phone, measure, weight, color, item, packagingType, barcode
     });
 
     await newOrder.save();

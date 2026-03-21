@@ -34,7 +34,17 @@ const orderSchema = new mongoose.Schema({
   packagesToOrder: {
     type: Number,
     default: 0,
-  }
+  },
+  shop: String,
+  contact: String,
+  shopRef: String,
+  phone: String,
+  measure: String,
+  weight: String,
+  color: String,
+  item: String,
+  packagingType: String,
+  barcode: String
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

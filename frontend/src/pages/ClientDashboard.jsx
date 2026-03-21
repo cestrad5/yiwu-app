@@ -57,7 +57,7 @@ const ClientDashboard = () => {
           {orders.map(order => (
             <div key={order._id} className="glass-card overflow-hidden">
               <div className="h-48 w-full bg-slate-200 relative">
-                <img src={order.photoUrl} alt="Product" className="w-full h-full object-cover" loading="lazy" />
+                <img src={order.photoUrl} alt="Product" className="w-full h-full object-contain" loading="lazy" />
                 <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-medium">
                   {order.category}
                 </div>

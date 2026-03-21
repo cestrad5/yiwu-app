@@ -3,7 +3,13 @@ import axios from '../utils/axiosConfig';
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Filter states for Export List
+  const [filterClient, setFilterClient] = useState('');
+  const [filterAgent, setFilterAgent] = useState('');
+  const [filterDate, setFilterDate] = useState('');
   
   // States for new user
   const [newUsername, setNewUsername] = useState('');
@@ -22,7 +28,17 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchOrders();
   }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const { data } = await axios.get('/orders');
+      setOrders(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -156,20 +172,84 @@ const AdminDashboard = () => {
       {/* Clients List & Export */}
       <div className="glass-card p-6 overflow-x-auto">
         <h2 className="text-xl font-semibold mb-4 text-slate-800">Lista de Clientes y Exportación</h2>
+        
+        {/* Filters */}
+        <div className="flex flex-wrap gap-4 mb-6 p-4 bg-slate-50 rounded-xl">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Buscar Cliente</label>
+            <input 
+              type="text" 
+              placeholder="Nombre..." 
+              value={filterClient} 
+              onChange={e => setFilterClient(e.target.value)} 
+              className="w-full p-2 border border-slate-200 rounded-lg text-sm"
+            />
+          </div>
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Filtrar por Agente</label>
+            <select 
+              value={filterAgent} 
+              onChange={e => setFilterAgent(e.target.value)} 
+              className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white"
+            >
+              <option value="">Todos los agentes</option>
+              {agents.map(a => <option key={a._id} value={a.username}>{a.username}</option>)}
+            </select>
+          </div>
+          <div className="w-full sm:w-auto">
+            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Fecha (Desde)</label>
+            <input 
+              type="date" 
+              value={filterDate} 
+              onChange={e => setFilterDate(e.target.value)} 
+              className="w-full p-2 border border-slate-200 rounded-lg text-sm"
+            />
+          </div>
+        </div>
+
         {loading ? <p>Cargando...</p> : (
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-200">
                 <th className="py-3 px-4 text-slate-600">Cliente</th>
                 <th className="py-3 px-4 text-slate-600">Agente Asignado</th>
+                <th className="py-3 px-4 text-slate-600">Última Modif. (Agente)</th>
                 <th className="py-3 px-4 text-slate-600 text-right">Acción</th>
               </tr>
             </thead>
             <tbody>
-              {clients.map(client => (
+              {clients
+                .map(client => {
+                  // Find the most recent order for this client
+                  const clientOrders = orders.filter(o => o.clientId?._id === client._id || o.clientId === client._id);
+                  const lastOrder = clientOrders.reduce((latest, o) => {
+                    const current = new Date(o.updatedAt || o.createdAt);
+                    if (!latest || current > latest) return current;
+                    return latest;
+                  }, null);
+
+                  return { ...client, lastModified: lastOrder };
+                })
+                .filter(c => {
+                  const matchClient = c.username.toLowerCase().includes(filterClient.toLowerCase());
+                  const agentName = c.assignedAgentId?.username || 'Ninguno';
+                  const matchAgent = filterAgent === '' || agentName === filterAgent;
+                  const matchDate = filterDate === '' || (c.lastModified && new Date(c.lastModified) >= new Date(filterDate));
+                  return matchClient && matchAgent && matchDate;
+                })
+                .sort((a, b) => {
+                   // Sort by lastModified, nulls at the end
+                   if (!a.lastModified) return 1;
+                   if (!b.lastModified) return -1;
+                   return new Date(b.lastModified) - new Date(a.lastModified);
+                })
+                .map(client => (
                 <tr key={client._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition">
                   <td className="py-3 px-4 font-medium text-slate-800">{client.username}</td>
                   <td className="py-3 px-4 text-slate-500">{client.assignedAgentId?.username || 'Ninguno'}</td>
+                  <td className="py-3 px-4 text-xs font-medium text-slate-400">
+                    {client.lastModified ? new Date(client.lastModified).toLocaleString() : 'Sin actividad'}
+                  </td>
                   <td className="py-3 px-4 text-right">
                     <button 
                       onClick={() => handleExport(client._id, client.username)}
@@ -180,7 +260,7 @@ const AdminDashboard = () => {
                   </td>
                 </tr>
               ))}
-              {clients.length === 0 && <tr><td colSpan="3" className="py-4 text-center text-slate-500">No hay clientes creados.</td></tr>}
+              {clients.length === 0 && <tr><td colSpan="4" className="py-4 text-center text-slate-500">No hay clientes creados.</td></tr>}
             </tbody>
           </table>
         )}
