@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from '../utils/axiosConfig';
+import imageCompression from 'browser-image-compression';
 
 const AgentDashboard = () => {
   const [clients, setClients] = useState([]);
@@ -34,15 +35,9 @@ const AgentDashboard = () => {
     // Let's fetch all users, and filter clients who have this agent assigned.
     const fetchClients = async () => {
       try {
-        const { data } = await axios.get('/auth/users');
-        const user = JSON.parse(localStorage.getItem('user'));
-        const myClients = data.filter(u => {
-          if (u.role !== 'CLIENT' || !u.assignedAgentId) return false;
-          const agentId = u.assignedAgentId._id ? String(u.assignedAgentId._id) : String(u.assignedAgentId);
-          return agentId === String(user.id);
-        });
-        setClients(myClients);
-        if (myClients.length > 0) setSelectedClient(myClients[0]._id);
+        const { data } = await axios.get('/auth/my-clients');
+        setClients(data);
+        if (data.length > 0) setSelectedClient(data[0]._id);
       } catch (err) {
         console.error(err);
       }
@@ -64,13 +59,30 @@ const AgentDashboard = () => {
     if (!selectedClient) return alert('Debes seleccionar un cliente');
 
     setLoading(true);
+    let finalPhoto = photo;
+
+    // Compression
+    try {
+      const options = {
+        maxSizeMB: 0.8,
+        maxWidthOrHeight: 1200,
+        useWebWorker: true
+      };
+      
+      const compressedFile = await imageCompression(photo, options);
+      // We keep the original filename but change the blob
+      finalPhoto = new File([compressedFile], photo.name, { type: photo.type });
+    } catch (compressionError) {
+      console.warn('Compression failed, using original photo', compressionError);
+    }
+
     const formData = new FormData();
     formData.append('clientId', selectedClient);
     formData.append('category', category);
     formData.append('priceRmb', priceRmb);
     formData.append('unitsPerPackage', unitsPerPackage);
     formData.append('cbmPerPackage', cbmPerPackage);
-    formData.append('photo', photo);
+    formData.append('photo', finalPhoto);
 
     // New Fields
     formData.append('shop', shop);

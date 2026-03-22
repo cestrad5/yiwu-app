@@ -10,4 +10,7 @@ router.put('/users/:id', requireAuth, requireRole(['ADMIN']), authController.upd
 router.delete('/users/:id', requireAuth, requireRole(['ADMIN']), authController.deleteUser);
 router.post('/assign-agent', requireAuth, requireRole(['ADMIN']), authController.assignAgentToClient);
 
+// For agents (translators) to see only their assigned clients
+router.get('/my-clients', requireAuth, requireRole(['AGENT']), authController.getMyClients);
+
 module.exports = router;

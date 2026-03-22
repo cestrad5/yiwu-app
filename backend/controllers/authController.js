@@ -124,3 +124,15 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
+exports.getMyClients = async (req, res) => {
+  try {
+    // req.user comes from authMiddleware (requireAuth)
+    const agentId = req.user.id;
+    const clients = await User.find({ assignedAgentId: agentId, role: 'CLIENT' }).select('username');
+    res.json(clients);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
