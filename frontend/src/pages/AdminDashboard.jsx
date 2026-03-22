@@ -11,6 +11,11 @@ const AdminDashboard = () => {
   const [filterAgent, setFilterAgent] = useState('');
   const [filterDate, setFilterDate] = useState('');
   
+  // Loading states for buttons
+  const [loadingCreate, setLoadingCreate] = useState(false);
+  const [loadingAssign, setLoadingAssign] = useState(false);
+  const [exportingId, setExportingId] = useState(null);
+  
   // States for new user
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -54,6 +59,7 @@ const AdminDashboard = () => {
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
+    setLoadingCreate(true);
     try {
       await axios.post('/auth/register', { username: newUsername, password: newPassword, role: newRole });
       alert('Usuario creado con éxito');
@@ -62,21 +68,27 @@ const AdminDashboard = () => {
       fetchUsers();
     } catch (err) {
       alert(err.response?.data?.message || 'Error al crear usuario');
+    } finally {
+      setLoadingCreate(false);
     }
   };
 
   const handleAssignAgent = async (e) => {
     e.preventDefault();
+    setLoadingAssign(true);
     try {
       await axios.post('/auth/assign-agent', { clientId: selectedClient, agentId: selectedAgent });
       alert('Traductor asignado con éxito');
       fetchUsers();
     } catch (err) {
-      alert(err.response?.data?.message || 'Error al asignar agente');
+      alert(err.response?.data?.message || 'Error al asignar traductor');
+    } finally {
+      setLoadingAssign(false);
     }
   };
 
   const handleExport = async (clientId, clientName) => {
+    setExportingId(clientId);
     try {
       const response = await axios.get(`/orders/export/${clientId}`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -88,6 +100,8 @@ const AdminDashboard = () => {
       link.parentNode.removeChild(link);
     } catch (err) {
       alert('Error al exportar, verifica los logs');
+    } finally {
+      setExportingId(null);
     }
   };
 
@@ -148,7 +162,18 @@ const AdminDashboard = () => {
               <option value="AGENT">Traductor</option>
               <option value="ADMIN">Administrador</option>
             </select>
-            <button type="submit" className="btn-primary">Crear Usuario</button>
+            <button 
+              type="submit" 
+              disabled={loadingCreate} 
+              className={`btn-primary flex items-center justify-center gap-2 ${loadingCreate ? 'opacity-70' : ''}`}
+            >
+              {loadingCreate ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Creando...
+                </>
+              ) : 'Crear Usuario'}
+            </button>
           </form>
         </div>
 
@@ -164,7 +189,18 @@ const AdminDashboard = () => {
               <option value="">-- Seleccionar Traductor --</option>
               {agents.map(a => <option key={a._id} value={a._id}>{a.username}</option>)}
             </select>
-            <button type="submit" className="btn-primary bg-gradient-to-r from-blue-500 to-indigo-600 shadow-blue-500/30">Asignar Traductor</button>
+            <button 
+              type="submit" 
+              disabled={loadingAssign} 
+              className={`btn-primary flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 shadow-blue-500/30 ${loadingAssign ? 'opacity-70' : ''}`}
+            >
+              {loadingAssign ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Asignando...
+                </>
+              ) : 'Asignar Traductor'}
+            </button>
           </form>
         </div>
       </div>
@@ -253,9 +289,15 @@ const AdminDashboard = () => {
                   <td className="py-3 px-4 text-right">
                     <button 
                       onClick={() => handleExport(client._id, client.username)}
-                      className="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-200 transition"
+                      disabled={exportingId === client._id}
+                      className={`min-w-[140px] flex items-center justify-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-200 transition ${exportingId === client._id ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
-                      Exportar Excel
+                      {exportingId === client._id ? (
+                        <>
+                           <div className="w-4 h-4 border-2 border-emerald-700/30 border-t-emerald-700 rounded-full animate-spin"></div>
+                           Generando...
+                        </>
+                      ) : 'Exportar Excel'}
                     </button>
                   </td>
                 </tr>

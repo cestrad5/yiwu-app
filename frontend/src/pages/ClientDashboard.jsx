@@ -40,9 +40,9 @@ const ClientDashboard = () => {
   const handleSaveAll = async () => {
     setSaving(true);
     try {
-      const updates = Object.keys(localQuantities).map(id => ({
-        id,
-        packagesToOrder: localQuantities[id]
+      const updates = Object.entries(localQuantities).map(([id, val]) => ({
+        orderId: id,
+        packagesToOrder: parseInt(val)
       }));
       await axios.put('/orders/bulk', { updates });
       alert('Pedido actualizado con éxito');

@@ -263,9 +263,14 @@ const AgentDashboard = () => {
           <button 
             type="submit" 
             disabled={loading} 
-            className={`btn-primary shadow-xl mt-6 text-lg py-4 ${loading ? 'opacity-70' : ''}`}
+            className={`btn-primary shadow-xl mt-6 text-lg py-4 flex items-center justify-center gap-3 ${loading ? 'opacity-70' : ''}`}
           >
-            {loading ? 'Subiendo y Guardando...' : 'Registrar Producto (Traductor)'}
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Subiendo y Guardando...
+              </>
+            ) : 'Registrar Producto (Traductor)'}
           </button>
         </form>
       </div>
