@@ -132,8 +132,7 @@ const AgentDashboard = () => {
     <div className="pb-24 pt-6 px-4 max-w-lg mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Captura de Productos</h1>
-          <p className="text-sm text-slate-500">Modo Traductor</p>
+          <h1 className="text-2xl font-bold text-slate-800">Registro de productos</h1>
         </div>
         <button className="text-sm text-red-500 font-semibold" onClick={() => { localStorage.clear(); window.location.href='/'; }}>Salir</button>
       </div>

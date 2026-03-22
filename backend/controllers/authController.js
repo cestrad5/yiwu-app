@@ -5,14 +5,15 @@ const jwt = require('jsonwebtoken');
 exports.register = async (req, res) => {
   try {
     const { username, password, role } = req.body;
+    const normalizedUsername = username.toLowerCase();
     
-    let user = await User.findOne({ username });
+    let user = await User.findOne({ username: normalizedUsername });
     if (user) return res.status(400).json({ message: 'User already exists' });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    user = new User({ username, password: hashedPassword, role: role || 'CLIENT' });
+    user = new User({ username: normalizedUsername, password: hashedPassword, role: role || 'CLIENT' });
     await user.save();
 
     res.status(201).json({ message: 'User created successfully', user: { id: user._id, username: user.username, role: user.role } });
@@ -25,16 +26,17 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
+    const normalizedUsername = username.toLowerCase();
 
     // Admin seed if it doesn't exist
-    if (username === 'admin' && await User.countDocuments() === 0) {
+    if (normalizedUsername === 'admin' && await User.countDocuments() === 0) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('admin123', salt);
       const adminUser = new User({ username: 'admin', password: hashedPassword, role: 'ADMIN' });
       await adminUser.save();
     }
 
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username: normalizedUsername });
     if (!user) return res.status(400).json({ message: 'Invalid Credentials' });
 
     const isMatch = await bcrypt.compare(password, user.password);

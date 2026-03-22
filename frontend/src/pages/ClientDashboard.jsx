@@ -133,8 +133,23 @@ const ClientDashboard = () => {
                   <div className="flex justify-between items-center mb-4">
                     <div className="text-2xl font-bold text-emerald-600">¥ {order.priceRmb}</div>
                     <div className="text-right text-sm text-slate-500">
-                      <p>{order.unitsPerPackage} cant / caja</p>
+                      <p>{order.unitsPerPackage} {order.unit || 'unid'} / caja</p>
                       <p>{order.cbmPerPackage} CBM / caja</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 mb-4 bg-slate-50 p-3 rounded-lg text-xs">
+                    <div>
+                      <span className="text-slate-400 font-bold uppercase block text-[9px]">Tamaño</span>
+                      <span className="text-slate-700 font-medium">{order.measure || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold uppercase block text-[9px]">Color</span>
+                      <span className="text-slate-700 font-medium">{order.color || 'N/A'}</span>
+                    </div>
+                    <div className="col-span-2 border-t border-slate-200 mt-1 pt-1">
+                      <span className="text-slate-400 font-bold uppercase block text-[9px]">Nota</span>
+                      <span className="text-slate-700 font-medium">{order.contact || 'S/N'}</span>
                     </div>
                   </div>
 
