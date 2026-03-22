@@ -124,7 +124,7 @@ const ClientDashboard = () => {
               <div key={order._id} className="glass-card overflow-hidden">
                 <div className="h-48 w-full bg-slate-200 relative">
                   <img src={order.photoUrl} alt="Product" className="w-full h-full object-contain" loading="lazy" />
-                  <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-medium">
+                  <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-medium uppercase tracking-tight">
                     {order.category}
                   </div>
                 </div>
@@ -133,13 +133,13 @@ const ClientDashboard = () => {
                   <div className="flex justify-between items-center mb-4">
                     <div className="text-2xl font-bold text-emerald-600">¥ {order.priceRmb}</div>
                     <div className="text-right text-sm text-slate-500">
-                      <p>{order.unitsPerPackage} unid/pqte</p>
-                      <p>{order.cbmPerPackage} CBM/pqte</p>
+                      <p>{order.unitsPerPackage} cant / caja</p>
+                      <p>{order.cbmPerPackage} CBM / caja</p>
                     </div>
                   </div>
 
                   <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-slate-700 font-medium">Paquetes a asignar:</span>
+                    <span className="text-slate-700 font-medium">Cajas a asignar:</span>
                     <div className="flex items-center gap-2">
                       <button 
                         className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center active:bg-slate-200 transition"

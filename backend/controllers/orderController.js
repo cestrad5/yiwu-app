@@ -8,7 +8,8 @@ exports.createOrder = async (req, res) => {
   try {
     const { 
       clientId, category, priceRmb, unitsPerPackage, cbmPerPackage,
-      shop, contact, shopRef, phone, measure, weight, color, item, packagingType, barcode
+      shop, contact, shopRef, phone, measure, weight, color, item, packagingType, barcode,
+      unit
     } = req.body;
     
     // Validations
@@ -29,7 +30,8 @@ exports.createOrder = async (req, res) => {
       cbmPerPackage,
       photoUrl: result.secure_url,
       packagesToOrder: 0,
-      shop, contact, shopRef, phone, measure, weight, color, item, packagingType, barcode
+      shop, contact, shopRef, phone, measure, weight, color, item, packagingType, barcode,
+      unit
     });
 
     await newOrder.save();
@@ -121,26 +123,25 @@ exports.exportClientOrders = async (req, res) => {
     const workbook = new exceljs.Workbook();
     const worksheet = workbook.addWorksheet('Orders');
 
-    // Define columns
+    // Define columns (17 total)
     worksheet.columns = [
       { header: 'Fecha', key: 'date', width: 20 },
       { header: 'Traductor', key: 'agent', width: 15 },
-      { header: 'Tienda', key: 'shop', width: 15 },
-      { header: 'Contacto', key: 'contact', width: 15 },
-      { header: 'Ref de Tienda', key: 'shopRef', width: 15 },
-      { header: 'Teléfono', key: 'phone', width: 15 },
-      { header: 'Medida (cm/ml)', key: 'measure', width: 15 },
-      { header: 'Peso', key: 'weight', width: 15 },
-      { header: 'Color', key: 'color', width: 15 },
-      { header: 'Item', key: 'item', width: 15 },
-      { header: 'Tipo de empaque', key: 'packagingType', width: 15 },
-      { header: 'Código de barras', key: 'barcode', width: 20 },
-      { header: 'Categoría', key: 'category', width: 15 },
-      { header: 'Foto', key: 'photo', width: 20 }, // Photo placeholder
-      { header: 'Precio (RMB)', key: 'price', width: 15 },
-      { header: 'Unidades/Paquete', key: 'units', width: 15 },
-      { header: 'CBM/Paquete', key: 'cbm', width: 15 },
-      { header: 'Paquetes Ordenados', key: 'ordered', width: 18 },
+      { header: 'Foto', key: 'photo', width: 20 },
+      { header: 'DESCRIPCIÓN', key: 'category', width: 20 },
+      { header: 'TAMAÑO', key: 'measure', width: 15 },
+      { header: 'NOTA', key: 'contact', width: 20 },
+      { header: 'CAJAS', key: 'ordered', width: 15 },
+      { header: 'CANT/ CAJA', key: 'units', width: 15 },
+      { header: 'UNIT', key: 'unit', width: 10 },
+      { header: 'PRECIO', key: 'price', width: 15 },
+      { header: 'CBM/ PQTE', key: 'cbm', width: 15 },
+      { header: 'SHOP No', key: 'shop', width: 15 },
+      { header: 'TELÉFONO', key: 'phone', width: 15 },
+      { header: 'PESO', key: 'weight', width: 15 },
+      { header: 'COLOR', key: 'color', width: 15 },
+      { header: 'TIPO EMPAQUE', key: 'packagingType', width: 18 },
+      { header: 'CÓD BARRAS', key: 'barcode', width: 20 },
     ];
 
     for (let i = 0; i < orders.length; i++) {
@@ -148,40 +149,39 @@ exports.exportClientOrders = async (req, res) => {
         const rowValues = {
             date: new Date(order.timestamp || order.createdAt).toLocaleDateString(),
             agent: order.agentId ? order.agentId.username : 'N/A',
-            shop: order.shop || '',
-            contact: order.contact || '',
-            shopRef: order.shopRef || '',
-            phone: order.phone || '',
-            measure: order.measure || '',
+            category: order.category, // Maps to DESCRIPCION
+            measure: order.measure || '', // Maps to TAMANO
+            contact: order.contact || '', // Maps to NOTA
+            ordered: order.packagesToOrder, // Maps to CAJAS
+            units: order.unitsPerPackage, // Maps to CANT/CAJA
+            unit: order.unit || 'unid', // Maps to UNIT (new)
+            price: order.priceRmb, // Maps to PRECIO
+            cbm: order.cbmPerPackage, // Maps to CBM /PQTE
+            shop: order.shop || '', // Maps to SHOP No
+            phone: order.phone || '', // Maps to TELEFONO
             weight: order.weight || '',
             color: order.color || '',
-            item: order.item || '',
             packagingType: order.packagingType || '',
-            barcode: order.barcode || '',
-            category: order.category,
-            price: order.priceRmb,
-            units: order.unitsPerPackage,
-            cbm: order.cbmPerPackage,
-            ordered: order.packagesToOrder
+            barcode: order.barcode || ''
         };
         const row = worksheet.addRow(rowValues);
-        row.height = 100; // Make row tall enough for image
+        row.height = 100;
 
         // Download and insert image
         try {
             const response = await axios.get(order.photoUrl, { responseType: 'arraybuffer' });
             const imageId = workbook.addImage({
                 buffer: response.data,
-                extension: 'webp', // Or determine from URL
+                extension: 'webp',
             });
-            // Photo is now in column 14 (N) - index 13
+            // Photo is now in column 3 (C) - index 2
             worksheet.addImage(imageId, {
-                tl: { col: 13, row: row.number - 1 }, 
+                tl: { col: 2, row: row.number - 1 }, 
                 ext: { width: 100, height: 100 }
             });
         } catch (imgErr) {
             console.error('Error fetching image for Excel:', imgErr.message);
-            worksheet.getCell(`N${row.number}`).value = 'Image Error';
+            worksheet.getCell(`C${row.number}`).value = 'Image Error';
         }
     }
 

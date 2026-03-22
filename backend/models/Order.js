@@ -44,7 +44,8 @@ const orderSchema = new mongoose.Schema({
   color: String,
   item: String,
   packagingType: String,
-  barcode: String
+  barcode: String,
+  unit: String
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);
